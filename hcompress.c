@@ -5,7 +5,7 @@
 #include "linkedList.h"
 
 typedef struct tnode {
-  double weight;
+  int weight;
   char c;
   struct tnode* left;
   struct tnode* right;
@@ -42,4 +42,26 @@ int main(int argc, char *argv[]) {
   }
 
   return 0;
+}
+
+tnode* createFreqTable(char* filename) {
+  tnode* leafNodes = (tnode*) malloc(127 * sizeof(tnode));
+  FILE* file = fopen(filename, "r");
+  char tmp;
+  while (fscanf(file, "%c", tmp) != EOF) {
+    leafNodes[(int) tmp].weight += 1;
+    leafNodes[(int) tmp].c = tmp;
+  }
+}
+
+tnode* createHuffmanTree(tnode*) {
+
+}
+
+void encodeFile(char*, tnode*) {
+
+}
+
+void decodeFile(char*, tnode*) {
+
 }
