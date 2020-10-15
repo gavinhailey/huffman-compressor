@@ -4,6 +4,22 @@
 #include <strings.h>
 #include "linkedList.h"
 
+typedef struct tnode {
+  double weight;
+  char c;
+  struct tnode* left;
+  struct tnode* right;
+  struct tnode* parent;
+} tnode;
+
+tnode* createFreqTable(char*);
+
+tnode* createHuffmanTree(tnode*);
+
+void encodeFile(char*, tnode*);
+
+void decodeFile(char*, tnode*);
+
 int main(int argc, char *argv[]) {
    if (argc != 3) {
       printf("Error: The correct format is \"hcompress -e filename\" or \"hcompress -d filename.huf\"\n"); fflush(stdout);
@@ -11,10 +27,10 @@ int main(int argc, char *argv[]) {
   }
 
   // Create the frequency table by reading the generic file
-  struct tnode* leafNodes = createFreqTable("decind.txt");
+  tnode* leafNodes = createFreqTable("decind.txt");
 
   // Create the huffman tree from the frequency table
-  struct tnode* treeRoot = createHuffmanTree(leafNodes);
+  tnode* treeRoot = createHuffmanTree(leafNodes);
 
   // encode
   if (strcmp(argv[1], "-e") == 0) {
