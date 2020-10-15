@@ -4,3 +4,6 @@
 #include <strings.h>
 #include "linkedList.h"
 
+int main() {
+  
+}
