@@ -12,20 +12,16 @@ LinkedList* llCreate() {
 }
 
 int llIsEmpty(LinkedList* ll) {
-  return (ll == NULL);
+  return ll == NULL;
 }
 
 void llDisplay(LinkedList* ll) {
-
   LinkedList* p = ll;
-
   printf("[");
-
   while (p != NULL) {
     printf("%d, ", (*p).value);
     p = p->next;
   }
-
   printf("]\n");
 }
 
