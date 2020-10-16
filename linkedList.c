@@ -2,11 +2,6 @@
 #include <stdlib.h>
 #include "linkedList.h"
 
-typedef struct node {
-  int value;
-  struct node* next;
-} LinkedList;
-
 LinkedList* llCreate() {
   return NULL;
 }
