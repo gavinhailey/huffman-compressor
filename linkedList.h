@@ -1,8 +1,16 @@
 //Header
 
-//struct
+//structs
+typedef struct tnode {
+  int weight;
+  char c;
+  struct tnode* left;
+  struct tnode* right;
+  struct tnode* parent;
+} tnode;
+
 typedef struct node {
-  int value;
+  tnode* value;
   struct node* next;
 } LinkedList;
 
@@ -10,5 +18,6 @@ typedef struct node {
 LinkedList* llCreate();
 int llIsEmpty(LinkedList* ll);
 void llDisplay(LinkedList* ll);
-void llAdd(LinkedList** ll, int newValue);
+void llAdd(LinkedList** ll, tnode* tNode);
+void llAddInOrder(LinkedList** ll, tnode* tNode);
 void llFree(LinkedList* ll);

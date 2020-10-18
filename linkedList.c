@@ -14,16 +14,16 @@ void llDisplay(LinkedList* ll) {
   LinkedList* p = ll;
   printf("[");
   while (p != NULL) {
-    printf("%d, ", (*p).value);
+    printf("%c, %d\n", (*p).value->c, (*p).value->weight);
     p = p->next;
   }
   printf("]\n");
 }
 
 
-void llAdd(LinkedList** ll, int newValue) {
+void llAdd(LinkedList** ll, tnode* tNode) {
   LinkedList* newNode = (LinkedList*)malloc(1 * sizeof(LinkedList));
-  newNode->value = newValue;
+  newNode->value = tNode;
   newNode->next = NULL;
 
   LinkedList* p = *ll;
@@ -35,6 +35,26 @@ void llAdd(LinkedList** ll, int newValue) {
       p = p->next;
     }
     p->next = newNode;
+  }
+}
+
+void llAddInOrder(LinkedList** ll, tnode* tNode) {
+  LinkedList* newNode = (LinkedList*)malloc(1 * sizeof(LinkedList));
+  newNode->value = tNode;
+  newNode->next = NULL;
+
+  LinkedList* p = *ll;
+
+  if (p == NULL) {
+    *ll = newNode;
+    llAddInOrder(ll, tNode);
+  } else {
+    while (p->next != NULL && p->next->value->weight < tNode->weight) {
+      p = p->next;
+    }
+    LinkedList* tmp = p->next;
+    p->next = newNode;
+    newNode->next = tmp;
   }
 }
 

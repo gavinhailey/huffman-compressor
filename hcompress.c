@@ -4,14 +4,6 @@
 #include <strings.h>
 #include "linkedList.h"
 
-typedef struct tnode {
-  int weight;
-  char c;
-  struct tnode* left;
-  struct tnode* right;
-  struct tnode* parent;
-} tnode;
-
 tnode* createFreqTable(char* filename);
 
 void sortFreqTable(tnode* leafNodes);
@@ -33,13 +25,9 @@ int main(int argc, char *argv[]) {
   // Create the frequency table by reading the generic file
   tnode* leafNodes = createFreqTable("alien.txt");
 
-  for (int i = 0; i < 127; i++) {
-    printf("%c %d\n", leafNodes[i].c, leafNodes[i].weight);
-  }
+  //Create the huffman tree from the frequency table
+  tnode* treeRoot = createHuffmanTree(leafNodes);
 
-  // //Create the huffman tree from the frequency table
-  // tnode* treeRoot = createHuffmanTree(leafNodes);
-  //
   // // encode
   // if (strcmp(argv[1], "-e") == 0) {
   //   // Pass the leafNodes since it will process bottom up
@@ -61,6 +49,7 @@ tnode* createFreqTable(char* filename) {
     leafNodes[(int) tmp].c = tmp;
   }
   sortFreqTable(leafNodes);
+  fclose(file);
   return leafNodes;
 }
 
@@ -78,7 +67,41 @@ void swap(tnode* x, tnode* y) {
 }
 
 tnode* createHuffmanTree(tnode* leafNodes) {
+  tnode* root;
+  LinkedList* p;
+  LinkedList* list = llCreate();
+  for (int i = 0; i < 127; i++) {
+    if (leafNodes[i].weight != 0)
+      llAddInOrder(&list, &leafNodes[i]);
+  }
+  p = list;
 
+  while (p->next != NULL) {
+    tnode* newNode = (tnode*) malloc(1*sizeof(tnode));
+    newNode->c = 0;
+    p->value->parent = newNode;
+    newNode->left = p->value;
+    p->next->value->parent = newNode;
+    newNode->right = p->next->value;
+    newNode->weight = newNode->right->weight + newNode->left->weight;
+    llAddInOrder(&list, newNode);
+    root = newNode;
+    if (p->next->next != NULL)
+      p = p->next->next;
+  }
+
+  llDisplay(list);
+  printf("%d\n", p->value->weight);
+  printf("%d\n", p->value->left->weight);
+  printf("%d\n", p->value->right->weight);
+  p = list;
+  while (p->next != NULL) {
+    LinkedList* tmp = p;
+    p = p->next;
+    tmp->next = NULL;
+  }
+  llDisplay(list);
+  return root;
 }
 
 void encodeFile(char* filename, tnode* leafNodes) {
