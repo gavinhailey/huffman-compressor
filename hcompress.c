@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 #include "linkedList.h"
 
 tnode* createFreqTable(char* filename);
@@ -28,14 +28,14 @@ int main(int argc, char *argv[]) {
   //Create the huffman tree from the frequency table
   tnode* treeRoot = createHuffmanTree(leafNodes);
 
-  // // encode
-  // if (strcmp(argv[1], "-e") == 0) {
-  //   // Pass the leafNodes since it will process bottom up
-  //   encodeFile(argv[2], leafNodes);
-  // } else { // decode
-  //   // Pass the tree root since it will process top down
-  //   decodeFile(argv[2], treeRoot);
-  // }
+  // encode
+  if (strcmp(argv[1], "-e") == 0) {
+    // Pass the leafNodes since it will process bottom up
+    encodeFile(argv[2], leafNodes);
+  } else { // decode
+    // Pass the tree root since it will process top down
+    decodeFile(argv[2], treeRoot);
+  }
 
   return 0;
 }
@@ -43,6 +43,10 @@ int main(int argc, char *argv[]) {
 tnode* createFreqTable(char* filename) {
   tnode* leafNodes = (tnode*) malloc(127 * sizeof(tnode));
   FILE* file = fopen(filename, "r");
+  if (file == NULL) {
+    printf("Invalid File\n");
+    exit(1);
+  }
   char tmp = 0;
   while (fscanf(file, "%c", &tmp) != EOF) {
     leafNodes[(int) tmp].weight += 1;
@@ -94,18 +98,50 @@ tnode* createHuffmanTree(tnode* leafNodes) {
   printf("%d\n", p->value->weight);
   printf("%d\n", p->value->left->weight);
   printf("%d\n", p->value->right->weight);
+
   p = list;
   while (p->next != NULL) {
     LinkedList* tmp = p;
     p = p->next;
-    tmp->next = NULL;
+    free(tmp);
   }
-  llDisplay(list);
+
   return root;
 }
 
 void encodeFile(char* filename, tnode* leafNodes) {
-
+  FILE* file = fopen(filename, "r");
+  FILE* writeFile = fopen(strcat(filename, ".huf"), "wb");
+  if (file == NULL) {
+    printf("Invalid File\n");
+    exit(1);
+  }
+  char tmp = 0;
+  unsigned int huffCode[8];
+  int c = 0;
+  while (fscanf(file, "%c", &tmp) != EOF) {
+    for (int i = 0; i < 127; i++) {
+      if(leafNodes[i].c == tmp) {
+        tnode* t = &leafNodes[i];
+        while (t->parent != NULL) {
+          if (t == t->parent->right)
+            huffCode[c] = 1;
+          else
+            huffCode[c] = 0;
+          c++; //lol
+          if (c == 8) {
+            for (int i = 0; i < c; i++) {
+              fprintf(writeFile, "%d", huffCode[i]);
+            }
+            c = 0;
+            memset(huffCode, 0, sizeof(huffCode));
+          }
+          if (t->parent != NULL)
+            t = t->parent;
+        }
+      }
+    }
+  }
 }
 
 void decodeFile(char* filename, tnode* treeRoot) {
