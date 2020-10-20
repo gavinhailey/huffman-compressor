@@ -100,31 +100,50 @@ void encodeFile(char* filename, tnode* leafNodes) {
     exit(1);
   }
   char tmp = 0;
-  unsigned char huffCode[8];
+  unsigned int huffCode[127];
   memset(huffCode, 0, sizeof(huffCode));
   int c = 0;
+  int height = 0;
   unsigned char byte = 0;
   while (fscanf(file, "%c", &tmp) != EOF) {
     tnode* t = &leafNodes[(int) tmp];
-    while (t->parent != NULL && c < 8) {
+    while (t->parent != NULL) {
       if (t == t->parent->right)
-        huffCode[c] = 1;
+        huffCode[height] = 1;
       else
-        huffCode[c] = 0;
-      c++; //lol
-      if (c == 8) {
-        for (int i = 0; i < 8; i++)
-          byte = byte | huffCode[i] << i;
-        fprintf(writeFile, "%c", byte);
-        c = 0;
-        memset(huffCode, 0, sizeof(huffCode));
-      }
+        huffCode[height] = 0;
+
+      height++;
       if (t->parent != NULL)
         t = t->parent;
     }
+    for(int i = 0; i < height; i++){
+      printf("%d", huffCode[i]);
+    }
+    printf("\n");
+    for (int i = height - 1; i >= 0 ; i--){
+      if(c == 8){
+        printf("TEST\n");
+        fprintf(writeFile, "%c", byte);
+        byte = 0;
+        c = 0;
+      }
+
+      byte = byte | (huffCode[i] << (7 - c));
+
+      c++;
+    }
+    for (int j = 0; j < 8; j++) {
+     printf("%d", !!((byte << j) & 0x80));
+    }
+    printf("\n");
+    fprintf(writeFile, "%c", byte);
+    c = 0;
+    byte = 0;
+    height = 0;
   }
-  fclose(file);
-  fclose(writeFile);
+   fclose(file);
+   fclose(writeFile);
 }
 
 void decodeFile(char* filename, tnode* treeRoot) {
@@ -140,7 +159,7 @@ void decodeFile(char* filename, tnode* treeRoot) {
   tnode* t = treeRoot;
   while (fscanf(file, "%c", &tmp) != EOF) {
     unsigned char byte = tmp;
-    for (int i = 0; i < 8; i++) {
+    for (int i = 7; i >= 0; i--) {
       if (((byte & (1 << i)) >> i) == 1 && t->right != NULL) {
         t = t->right;
       } else if (t->left != NULL) {
