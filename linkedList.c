@@ -47,14 +47,18 @@ void llAddInOrder(LinkedList** ll, tnode* tNode) {
 
   if (p == NULL) {
     *ll = newNode;
-    llAddInOrder(ll, tNode);
   } else {
-    while (p->next != NULL && p->next->value->weight < tNode->weight) {
-      p = p->next;
-    }
+    if (p->value->weight > tNode->weight) {
+      newNode->next = p;
+      *ll = newNode;
+    } else {
+      while (p->next != NULL && p->next->value->weight < tNode->weight) {
+        p = p->next;
+      }
     LinkedList* tmp = p->next;
     p->next = newNode;
     newNode->next = tmp;
+    }
   }
 }
 

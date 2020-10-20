@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Create the frequency table by reading the generic file
-  tnode* leafNodes = createFreqTable("alien.txt");
+  tnode* leafNodes = createFreqTable("test.txt");
 
   //Create the huffman tree from the frequency table
   tnode* treeRoot = createHuffmanTree(leafNodes);
@@ -52,22 +52,8 @@ tnode* createFreqTable(char* filename) {
     leafNodes[(int) tmp].weight += 1;
     leafNodes[(int) tmp].c = tmp;
   }
-  sortFreqTable(leafNodes);
   fclose(file);
   return leafNodes;
-}
-
-void sortFreqTable(tnode* leafNodes) {
-  for (int i = 0; i < 126; i++)
-    for (int j = 0; j < 126 - i; j++)
-      if ((leafNodes[j]).weight > leafNodes[j+1].weight)
-        swap(&leafNodes[j], &leafNodes[j+1]);
-}
-
-void swap(tnode* x, tnode* y) {
-    tnode tmp = *x;
-    *x = *y;
-    *y = tmp;
 }
 
 tnode* createHuffmanTree(tnode* leafNodes) {
@@ -95,9 +81,6 @@ tnode* createHuffmanTree(tnode* leafNodes) {
   }
 
   llDisplay(list);
-  printf("%d\n", p->value->weight);
-  printf("%d\n", p->value->left->weight);
-  printf("%d\n", p->value->right->weight);
 
   p = list;
   while (p->next != NULL) {
@@ -111,39 +94,61 @@ tnode* createHuffmanTree(tnode* leafNodes) {
 
 void encodeFile(char* filename, tnode* leafNodes) {
   FILE* file = fopen(filename, "r");
-  FILE* writeFile = fopen(strcat(filename, ".huf"), "wb");
+  FILE* writeFile = fopen(strcat(filename, ".huf"), "w");
   if (file == NULL) {
     printf("Invalid File\n");
     exit(1);
   }
   char tmp = 0;
-  unsigned int huffCode[8];
+  unsigned char huffCode[8];
+  memset(huffCode, 0, sizeof(huffCode));
   int c = 0;
+  unsigned char byte = 0;
   while (fscanf(file, "%c", &tmp) != EOF) {
-    for (int i = 0; i < 127; i++) {
-      if(leafNodes[i].c == tmp) {
-        tnode* t = &leafNodes[i];
-        while (t->parent != NULL) {
-          if (t == t->parent->right)
-            huffCode[c] = 1;
-          else
-            huffCode[c] = 0;
-          c++; //lol
-          if (c == 8) {
-            for (int i = 0; i < c; i++) {
-              fprintf(writeFile, "%d", huffCode[i]);
-            }
-            c = 0;
-            memset(huffCode, 0, sizeof(huffCode));
-          }
-          if (t->parent != NULL)
-            t = t->parent;
-        }
+    tnode* t = &leafNodes[(int) tmp];
+    while (t->parent != NULL && c < 8) {
+      if (t == t->parent->right)
+        huffCode[c] = 1;
+      else
+        huffCode[c] = 0;
+      c++; //lol
+      if (c == 8) {
+        for (int i = 0; i < 8; i++)
+          byte = byte | huffCode[i] << i;
+        fprintf(writeFile, "%c", byte);
+        c = 0;
+        memset(huffCode, 0, sizeof(huffCode));
       }
+      if (t->parent != NULL)
+        t = t->parent;
     }
   }
+  fclose(file);
+  fclose(writeFile);
 }
 
 void decodeFile(char* filename, tnode* treeRoot) {
-
+  FILE* file = fopen(filename, "r");
+  FILE* writeFile = fopen(strcat(filename, ".dec"), "w");
+  if (file == NULL) {
+    printf("Invalid File\n");
+    exit(1);
+  }
+  unsigned char tmp = 0;
+  unsigned int huffCode[8];
+  memset(huffCode, 0, sizeof(huffCode));
+  tnode* t = treeRoot;
+  while (fscanf(file, "%c", &tmp) != EOF) {
+    unsigned char byte = tmp;
+    for (int i = 0; i < 8; i++) {
+      if (((byte & (1 << i)) >> i) == 1 && t->right != NULL) {
+        t = t->right;
+      } else if (t->left != NULL) {
+        t = t->left;
+      } else {
+        fprintf(writeFile, "%c", t->c);
+        t = treeRoot;
+      }
+    }
+  }
 }
