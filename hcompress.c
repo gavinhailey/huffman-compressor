@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Create the frequency table by reading the generic file
-  tnode* leafNodes = createFreqTable("test.txt");
+  tnode* leafNodes = createFreqTable("alien.txt");
 
   //Create the huffman tree from the frequency table
   tnode* treeRoot = createHuffmanTree(leafNodes);
@@ -123,7 +123,10 @@ void encodeFile(char* filename, tnode* leafNodes) {
     printf("\n");
     for (int i = height - 1; i >= 0 ; i--){
       if(c == 8){
-        printf("TEST\n");
+        for (int j = 0; j < 8; j++) {
+         printf("%d", !!((byte << j) & 0x80));
+        }
+        printf("\n");
         fprintf(writeFile, "%c", byte);
         byte = 0;
         c = 0;
@@ -133,15 +136,12 @@ void encodeFile(char* filename, tnode* leafNodes) {
 
       c++;
     }
-    for (int j = 0; j < 8; j++) {
-     printf("%d", !!((byte << j) & 0x80));
-    }
-    printf("\n");
-    fprintf(writeFile, "%c", byte);
-    c = 0;
-    byte = 0;
+
+
+
     height = 0;
   }
+//  fprintf(writeFile, "%c", byte);
    fclose(file);
    fclose(writeFile);
 }
@@ -154,19 +154,25 @@ void decodeFile(char* filename, tnode* treeRoot) {
     exit(1);
   }
   unsigned char tmp = 0;
-  unsigned int huffCode[8];
-  memset(huffCode, 0, sizeof(huffCode));
   tnode* t = treeRoot;
   while (fscanf(file, "%c", &tmp) != EOF) {
     unsigned char byte = tmp;
+    for (int j = 0; j < 8; j++) {
+     printf("%d", !!((byte << j) & 0x80));
+    }
+    printf("\n");
     for (int i = 7; i >= 0; i--) {
       if (((byte & (1 << i)) >> i) == 1 && t->right != NULL) {
+        printf("1\n");
         t = t->right;
-      } else if (t->left != NULL) {
+      } else if (((byte & (1 << i)) >> i) == 0 && t->left != NULL) {
+        printf("0\n");
         t = t->left;
-      } else {
+      } else if (t->right == NULL && t->left == NULL){
+        printf("DONE\n");
         fprintf(writeFile, "%c", t->c);
         t = treeRoot;
+        i++;
       }
     }
   }
