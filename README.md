@@ -1,5 +1,6 @@
 # Systems Programming - Assignment 1
-## Gavin Hailey and Giovanni Thompson
+
+Created by: Gavin Hailey and Giovanni Thompson
 
 ### Status
 All functions work properly. Original and decoded files are identical. All memory in the heap was freed.
