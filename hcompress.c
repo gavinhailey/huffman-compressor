@@ -155,8 +155,6 @@ void decodeFile(char* filename, tnode* treeRoot) {
       }
     }
   }
-  //fclose(file);
-  //fclose(writeFile);
 }
 
 void freeTree(tnode* node) {
